@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	urlpath "path"
 	"path/filepath"
 	"text/tabwriter"
 
@@ -289,13 +290,18 @@ To revert this, run:
 `)
 }
 
+// hostpath returns a concatenation of
+func hostpath(route, path string) string {
+	return urlpath.Join(route, filepath.ToSlash(abs(path)))
+}
+
 // hostfolderaddcmd adds a folder to the host.
 func hostfolderaddcmd(path, size string) {
 	size, err := parseFilesize(size)
 	if err != nil {
 		die("Could not parse size:", err)
 	}
-	err = post("/storage/folders/add"+filepath.ToSlash(abs(path)), "size="+size)
+	err = post(hostpath("/storage/folders/add", path), "size="+size)
 	if err != nil {
 		die("Could not add folder:", err)
 	}
@@ -304,7 +310,7 @@ func hostfolderaddcmd(path, size string) {
 
 // hostfolderremovecmd removes a folder from the host.
 func hostfolderremovecmd(path string) {
-	err := post("/storage/folders/remove"+filepath.ToSlash(abs(path)), "")
+	err := post(hostpath("/storage/folders/remove", path), "")
 	if err != nil {
 		die("Could not remove folder:", err)
 	}
@@ -317,7 +323,7 @@ func hostfolderresizecmd(path, newsize string) {
 	if err != nil {
 		die("Could not parse size:", err)
 	}
-	err = post("/storage/folders/resize"+filepath.ToSlash(abs(path)), "newsize="+newsize)
+	err = post(hostpath("/storage/folders/resize", path), "newsize="+newsize)
 	if err != nil {
 		die("Could not resize folder:", err)
 	}
